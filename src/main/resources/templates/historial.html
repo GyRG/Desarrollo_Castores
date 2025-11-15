@@ -1,0 +1,22 @@
+package com.inventario.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/historial")
+@Slf4j
+public class HistorialController {
+    
+    @GetMapping
+    public String verHistorial(Model model, Authentication authentication) {
+        log.info("Cargando historial para usuario: {}", authentication.getName());
+        model.addAttribute("username", authentication.getName());
+        model.addAttribute("mensaje", "Módulo de historial - Próximamente");
+        return "historial";
+    }
+}
