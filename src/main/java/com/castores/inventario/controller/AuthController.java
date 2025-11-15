@@ -1,7 +1,9 @@
 package com.inventario.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -21,8 +23,9 @@ public class AuthController {
     }
     
     @GetMapping("/dashboard")
-    public String dashboard() {
-        log.info("Cargando dashboard");
+    public String dashboard(Model model, Authentication authentication) {
+        log.info("Cargando dashboard para usuario: {}", authentication.getName());
+        model.addAttribute("username", authentication.getName());
         return "dashboard";
     }
 }
