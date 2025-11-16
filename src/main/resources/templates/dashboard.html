@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Dashboard - Sistema de Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/dashboard">🏢 Sistema de Inventario</a>
+            <a class="navbar-brand" href="#">🏢 Sistema de Inventario</a>
             <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">Usuario: <strong th:text="${username}"></strong></span>
+                <span class="navbar-text me-3">
+                    Usuario: <strong th:text="${username}"></strong>
+                    <span th:if="${isAdmin}" class="badge bg-primary ms-1">Administrador</span>
+                    <span th:if="${isAlmacenista}" class="badge bg-success ms-1">Almacenista</span>
+                </span>
                 <form th:action="@{/logout}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-light btn-sm">🚪 Cerrar Sesión</button>
                 </form>
@@ -30,6 +36,7 @@
         <h2>📊 Dashboard Principal</h2>
         
         <div class="row mt-4">
+            <!-- Módulo Inventario - Para ambos roles -->
             <div class="col-md-4 mb-3">
                 <div class="card text-center h-100">
                     <div class="card-body">
@@ -40,22 +47,26 @@
                 </div>
             </div>
             
-            <div class="col-md-4 mb-3">
-                <div class="card text-center h-100">
+            <!-- Módulo Historial - Solo ADMIN -->
+            <div th:if="${isAdmin}" class="col-md-4 mb-3">
+                <div class="card text-center h-100 border-primary">
                     <div class="card-body">
                         <h5 class="card-title">📋 Historial de Movimientos</h5>
-                        <p class="card-text">Ver registro de entradas y salidas</p>
+                        <p class="card-text">Ver registro completo de entradas y salidas</p>
+                        <span class="badge bg-primary mb-2">Solo Administrador</span>
                         <a href="/historial" class="btn btn-primary">Ver Historial</a>
                     </div>
                 </div>
             </div>
             
-            <div class="col-md-4 mb-3">
-                <div class="card text-center h-100">
+            <!-- Módulo Salida - Solo ALMACENISTA -->
+            <div th:if="${isAlmacenista}" class="col-md-4 mb-3">
+                <div class="card text-center h-100 border-success">
                     <div class="card-body">
                         <h5 class="card-title">🚪 Salida de Productos</h5>
                         <p class="card-text">Retirar productos del almacén</p>
-                        <a href="/salida" class="btn btn-primary">Salida de Productos</a>
+                        <span class="badge bg-success mb-2">Solo Almacenista</span>
+                        <a href="/salida" class="btn btn-success">Salida de Productos</a>
                     </div>
                 </div>
             </div>
@@ -72,18 +83,18 @@
                             <div class="col-md-6">
                                 <h6>✅ Funcionalidades activas:</h6>
                                 <ul>
-                                    <li>Autenticación y autorización</li>
+                                    <li>Autenticación y autorización por roles</li>
                                     <li>Gestión de usuarios</li>
                                     <li>Navegación entre módulos</li>
                                     <li>Conexión a base de datos MySQL</li>
+                                    <li>Registro de movimientos</li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
-                                <h6>🚧 En desarrollo:</h6>
+                                <h6>🔐 Permisos por rol:</h6>
                                 <ul>
-                                    <li>CRUD completo de productos</li>
-                                    <li>Registro de movimientos</li>
-                                    <li>Reportes e historiales</li>
+                                    <li><strong>Administrador:</strong> Gestión completa, historial</li>
+                                    <li><strong>Almacenista:</strong> Solo retiro de productos</li>
                                 </ul>
                             </div>
                         </div>

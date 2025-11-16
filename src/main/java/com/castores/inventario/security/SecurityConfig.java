@@ -17,11 +17,23 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/login", "/css/**", "/js/**", "/error").permitAll()
-                .requestMatchers("/inventario/**").hasAnyRole("ADMIN", "ALMACENISTA")
-                .requestMatchers("/inventario/agregar", "/inventario/entrada/**", 
-                               "/inventario/baja/**", "/inventario/reactivar/**").hasRole("ADMIN")
+                
+                // Módulo de Inventario - Ambos roles
+                .requestMatchers("/inventario").hasAnyRole("ADMIN", "ALMACENISTA")
+                
+                // Funciones solo para ADMIN en inventario
+                .requestMatchers("/inventario/agregar").hasRole("ADMIN")
+                .requestMatchers("/inventario/entrada/**").hasRole("ADMIN")
+                .requestMatchers("/inventario/baja/**").hasRole("ADMIN")
+                .requestMatchers("/inventario/reactivar/**").hasRole("ADMIN")
+                .requestMatchers("/inventario/editar/**").hasRole("ADMIN")
+                
+                // Módulo de Salida - Solo ALMACENISTA
                 .requestMatchers("/salida/**").hasRole("ALMACENISTA")
-                .requestMatchers("/historial/**").hasAnyRole("ADMIN", "ALMACENISTA")
+                
+                // Módulo de Historial - Solo ADMIN
+                .requestMatchers("/historial/**").hasRole("ADMIN")
+                
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

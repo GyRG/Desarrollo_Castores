@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Inventario - Sistema de Inventario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,8 +13,8 @@
             <div class="navbar-nav">
                 <a class="nav-link" href="/dashboard">Dashboard</a>
                 <a class="nav-link active" href="/inventario">Inventario</a>
-                <a class="nav-link" href="/historial">Historial</a>
-                <a class="nav-link" href="/salida">Salida</a>
+                <a class="nav-link" href="/historial" sec:authorize="hasRole('ADMIN')">Historial</a>
+                <a class="nav-link" href="/salida" sec:authorize="hasRole('ALMACENISTA')">Salida</a>
             </div>
             <div class="navbar-nav ms-auto">
                 <span class="navbar-text me-3">Usuario: <strong th:text="${username}"></strong></span>
@@ -65,8 +66,8 @@
             </div>
         </div>
 
-        <!-- Formulario para agregar producto -->
-        <div class="card mb-4">
+        <!-- Formulario para agregar producto - Solo ADMIN -->
+        <div class="card mb-4" sec:authorize="hasRole('ADMIN')">
             <div class="card-header bg-success text-white">
                 <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Agregar Nuevo Producto</h5>
             </div>
@@ -106,7 +107,9 @@
             <div class="card-body">
                 <div th:if="${#lists.isEmpty(productos)}" class="alert alert-warning text-center">
                     <i class="fas fa-inbox"></i> No hay productos en el inventario.
-                    <br><small>Agrega el primer producto usando el formulario de arriba.</small>
+                    <span sec:authorize="hasRole('ADMIN')">
+                        <br><small>Agrega el primer producto usando el formulario de arriba.</small>
+                    </span>
                 </div>
                 
                 <div th:unless="${#lists.isEmpty(productos)}" class="table-responsive">
@@ -118,7 +121,8 @@
                                 <th>Descripción</th>
                                 <th>Cantidad</th>
                                 <th>Estado</th>
-                                <th>Acciones</th>
+                                <th sec:authorize="hasRole('ADMIN')">Acciones</th>
+                                <th sec:authorize="hasRole('ALMACENISTA')">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -144,20 +148,15 @@
                                         <i class="fas fa-times"></i> Inactivo
                                     </span>
                                 </td>
-                                <td>
+                                
+                                <!-- Acciones para ADMIN -->
+                                <td sec:authorize="hasRole('ADMIN')">
                                     <div th:if="${producto.activo}" class="btn-group btn-group-sm" role="group">
                                         <!-- Entrada de inventario -->
                                         <button type="button" class="btn btn-outline-success" 
                                                 data-bs-toggle="modal" 
                                                 th:data-bs-target="'#entradaModal' + ${producto.id}">
                                             <i class="fas fa-plus"></i> Entrada
-                                        </button>
-                                        
-                                        <!-- Salida de inventario -->
-                                        <button type="button" class="btn btn-outline-warning"
-                                                data-bs-toggle="modal"
-                                                th:data-bs-target="'#salidaModal' + ${producto.id}">
-                                            <i class="fas fa-minus"></i> Salida
                                         </button>
                                         
                                         <!-- Editar producto -->
@@ -185,7 +184,7 @@
                                         </form>
                                     </div>
 
-                                    <!-- Modal para Entrada -->
+                                    <!-- Modal para Entrada (Solo ADMIN) -->
                                     <div class="modal fade" th:id="'entradaModal' + ${producto.id}" tabindex="-1">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
@@ -213,34 +212,24 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Modal para Salida -->
-                                    <div class="modal fade" th:id="'salidaModal' + ${producto.id}" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Salida de Inventario</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <form th:action="@{'/inventario/salida/' + ${producto.id}}" method="post">
-                                                    <div class="modal-body">
-                                                        <p>Producto: <strong th:text="${producto.nombre}"></strong></p>
-                                                        <p>Stock actual: <span th:text="${producto.cantidad}" class="badge bg-info"></span></p>
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Cantidad a retirar:</label>
-                                                            <input type="number" name="cantidad" class="form-control" 
-                                                                   th:max="${producto.cantidad}" min="1" value="1" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                        <button type="submit" class="btn btn-warning">
-                                                            <i class="fas fa-minus"></i> Registrar Salida
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
+                                </td>
+                                
+                                <!-- Acciones para ALMACENISTA -->
+                                <td sec:authorize="hasRole('ALMACENISTA')">
+                                    <div th:if="${producto.activo && producto.cantidad > 0}">
+                                        <span class="text-muted">
+                                            <i class="fas fa-info-circle"></i> Use el módulo "Salida" para retirar productos
+                                        </span>
+                                    </div>
+                                    <div th:if="${producto.activo && producto.cantidad == 0}">
+                                        <span class="text-danger">
+                                            <i class="fas fa-exclamation-triangle"></i> Sin stock disponible
+                                        </span>
+                                    </div>
+                                    <div th:unless="${producto.activo}">
+                                        <span class="text-muted">
+                                            <i class="fas fa-ban"></i> Producto inactivo
+                                        </span>
                                     </div>
                                 </td>
                             </tr>
