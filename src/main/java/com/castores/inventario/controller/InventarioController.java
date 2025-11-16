@@ -125,40 +125,41 @@ public class InventarioController {
         }
         return "redirect:/inventario?activos=false";
     }
-    
-    // ENTRADA de inventario
-    @PostMapping("/entrada/{id}")
-    public String entradaProducto(@PathVariable Long id,
-                                 @RequestParam Integer cantidad,
-                                 Authentication authentication,
-                                 RedirectAttributes redirectAttributes) {
-        try {
-            Producto producto = productoService.registrarEntrada(id, cantidad);
-            redirectAttributes.addFlashAttribute("mensaje", 
-                "✅ Entrada registrada: +" + cantidad + " unidades de " + producto.getNombre());
-        } catch (Exception e) {
-            log.error("Error al registrar entrada", e);
-            redirectAttributes.addFlashAttribute("error", 
-                "❌ Error al registrar entrada: " + e.getMessage());
-        }
-        return "redirect:/inventario";
+    // ENTRADA de inventario - ACTUALIZADO
+@PostMapping("/entrada/{id}")
+public String entradaProducto(@PathVariable Long id,
+                             @RequestParam Integer cantidad,
+                             Authentication authentication,
+                             RedirectAttributes redirectAttributes) {
+    try {
+        String usuario = authentication.getName();
+        Producto producto = productoService.registrarEntrada(id, cantidad, usuario, "Entrada desde módulo de inventario");
+        redirectAttributes.addFlashAttribute("mensaje", 
+            "✅ Entrada registrada: +" + cantidad + " unidades de " + producto.getNombre());
+    } catch (Exception e) {
+        log.error("Error al registrar entrada", e);
+        redirectAttributes.addFlashAttribute("error", 
+            "❌ Error al registrar entrada: " + e.getMessage());
     }
-    
-    // SALIDA de inventario
-    @PostMapping("/salida/{id}")
-    public String salidaProducto(@PathVariable Long id,
-                                @RequestParam Integer cantidad,
-                                Authentication authentication,
-                                RedirectAttributes redirectAttributes) {
-        try {
-            Producto producto = productoService.registrarSalida(id, cantidad);
-            redirectAttributes.addFlashAttribute("mensaje", 
-                "✅ Salida registrada: -" + cantidad + " unidades de " + producto.getNombre());
-        } catch (Exception e) {
-            log.error("Error al registrar salida", e);
-            redirectAttributes.addFlashAttribute("error", 
-                "❌ Error al registrar salida: " + e.getMessage());
-        }
-        return "redirect:/inventario";
+    return "redirect:/inventario";
+}
+
+// SALIDA de inventario - ACTUALIZADO  
+@PostMapping("/salida/{id}")
+public String salidaProducto(@PathVariable Long id,
+                            @RequestParam Integer cantidad,
+                            Authentication authentication,
+                            RedirectAttributes redirectAttributes) {
+    try {
+        String usuario = authentication.getName();
+        Producto producto = productoService.registrarSalida(id, cantidad, usuario, "Salida desde módulo de inventario");
+        redirectAttributes.addFlashAttribute("mensaje", 
+            "✅ Salida registrada: -" + cantidad + " unidades de " + producto.getNombre());
+    } catch (Exception e) {
+        log.error("Error al registrar salida", e);
+        redirectAttributes.addFlashAttribute("error", 
+            "❌ Error al registrar salida: " + e.getMessage());
     }
+    return "redirect:/inventario";
+}
 }

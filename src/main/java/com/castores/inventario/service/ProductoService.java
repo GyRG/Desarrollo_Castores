@@ -1,7 +1,10 @@
 package com.inventario.service;
 
+import com.inventario.model.Movimiento;
 import com.inventario.model.Producto;
+import com.inventario.model.TipoMovimiento;
 import com.inventario.repository.ProductoRepository;
+import com.inventario.repository.MovimientoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,16 +20,15 @@ import java.util.Optional;
 public class ProductoService {
     
     private final ProductoRepository productoRepository;
+    private final MovimientoRepository movimientoRepository; // Agregado
     
     // CREATE - Agregar nuevo producto
     public Producto guardarProducto(Producto producto) {
         try {
-            // Validar que el nombre no esté vacío
             if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {
                 throw new IllegalArgumentException("El nombre del producto no puede estar vacío");
             }
             
-            // Asegurar valores por defecto
             if (producto.getCantidad() == null) {
                 producto.setCantidad(0);
             }
@@ -82,7 +84,6 @@ public class ProductoService {
             if (productoExistente.isPresent()) {
                 Producto producto = productoExistente.get();
                 
-                // Actualizar campos
                 producto.setNombre(productoActualizado.getNombre());
                 producto.setDescripcion(productoActualizado.getDescripcion());
                 producto.setCantidad(productoActualizado.getCantidad());
@@ -145,8 +146,8 @@ public class ProductoService {
         }
     }
     
-    // ENTRADA de inventario
-    public Producto registrarEntrada(Long id, Integer cantidad) {
+    // ENTRADA de inventario CON registro de movimiento
+    public Producto registrarEntrada(Long id, Integer cantidad, String usuario, String observaciones) {
         try {
             if (cantidad <= 0) {
                 throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
@@ -162,8 +163,19 @@ public class ProductoService {
                 }
                 
                 producto.setCantidad(producto.getCantidad() + cantidad);
-                
                 Producto productoActualizado = productoRepository.save(producto);
+                
+                // REGISTRAR MOVIMIENTO
+                Movimiento movimiento = new Movimiento(
+                    TipoMovimiento.ENTRADA, 
+                    cantidad, 
+                    usuario, 
+                    productoActualizado,
+                    observaciones != null ? observaciones : "Entrada de inventario"
+                );
+                movimientoRepository.save(movimiento);
+                log.info("📝 Movimiento de ENTRADA registrado para producto: {}", productoActualizado.getNombre());
+                
                 log.info("✅ Entrada registrada: {} unidades de {}", cantidad, productoActualizado.getNombre());
                 return productoActualizado;
             } else {
@@ -176,8 +188,8 @@ public class ProductoService {
         }
     }
     
-    // SALIDA de inventario
-    public Producto registrarSalida(Long id, Integer cantidad) {
+    // SALIDA de inventario CON registro de movimiento
+    public Producto registrarSalida(Long id, Integer cantidad, String usuario, String observaciones) {
         try {
             if (cantidad <= 0) {
                 throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
@@ -200,8 +212,19 @@ public class ProductoService {
                 }
                 
                 producto.setCantidad(producto.getCantidad() - cantidad);
-                
                 Producto productoActualizado = productoRepository.save(producto);
+                
+                // REGISTRAR MOVIMIENTO
+                Movimiento movimiento = new Movimiento(
+                    TipoMovimiento.SALIDA, 
+                    cantidad, 
+                    usuario, 
+                    productoActualizado,
+                    observaciones != null ? observaciones : "Salida de inventario"
+                );
+                movimientoRepository.save(movimiento);
+                log.info("📝 Movimiento de SALIDA registrado para producto: {}", productoActualizado.getNombre());
+                
                 log.info("✅ Salida registrada: {} unidades de {}", cantidad, productoActualizado.getNombre());
                 return productoActualizado;
             } else {
@@ -212,6 +235,16 @@ public class ProductoService {
             log.error("❌ Error al registrar salida: {}", e.getMessage());
             throw e;
         }
+    }
+    
+    // ENTRADA simple (para compatibilidad con código existente)
+    public Producto registrarEntrada(Long id, Integer cantidad) {
+        return registrarEntrada(id, cantidad, "Sistema", "Entrada manual");
+    }
+    
+    // SALIDA simple (para compatibilidad con código existente)
+    public Producto registrarSalida(Long id, Integer cantidad) {
+        return registrarSalida(id, cantidad, "Sistema", "Salida manual");
     }
     
     // Buscar productos por nombre
