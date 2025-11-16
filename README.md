@@ -20,7 +20,7 @@ Sistema completo de gestión de inventario desarrollado con **Spring Boot** que 
 
 ```bash
 # 1. Clonar el proyecto (si aplica)
-git clone <url-del-repositorio>
+git clone https://github.com/GyRG/Desarrollo_Castores.git
 cd inventario-app
 
 # 2. Ejecutar con Docker Compose
