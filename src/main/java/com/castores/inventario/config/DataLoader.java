@@ -9,9 +9,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import java.util.Optional;
 
 @Component
 @Order(1)
@@ -23,49 +22,40 @@ public class DataLoader implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    @Transactional
     public void run(String... args) throws Exception {
-        log.info("🚀 ===== INICIANDO DATALOADER =====");
+        log.info("🚀 ===== INICIANDO DATALOADER - CONFIGURACIÓN DE USUARIOS =====");
         
         try {
-            // Diagnosticar la base de datos
-            long totalUsuarios = usuarioRepository.count();
-            log.info("📊 Diagnóstico - Total de usuarios en BD: {}", totalUsuarios);
-            
-            // Crear usuario ADMIN
-            if (usuarioRepository.findByUsername("admin").isEmpty()) {
-                log.info("👤 Creando usuario ADMIN...");
-                Usuario admin = new Usuario();
-                admin.setUsername("admin");
-                admin.setPassword(passwordEncoder.encode("admin123"));
-                admin.setRoles(Set.of(Rol.ADMIN));
+            // Actualizar password del ADMIN
+            Optional<Usuario> adminOpt = usuarioRepository.findByCorreo("admin@inventario.com");
+            if (adminOpt.isPresent()) {
+                Usuario admin = adminOpt.get();
+                String encodedPassword = passwordEncoder.encode("admin123");
+                admin.setContrasena(encodedPassword);
                 usuarioRepository.save(admin);
-                log.info("✅ ADMIN creado - usuario: admin, password: admin123");
+                log.info("✅ ADMIN configurado - correo: admin@inventario.com, password: admin123");
+                log.info("🔑 Hash generado: {}", encodedPassword);
             } else {
-                log.info("ℹ️ ADMIN ya existe");
+                log.error("❌ ADMIN no encontrado en la base de datos");
             }
-            
-            // Crear usuario ALMACENISTA
-            if (usuarioRepository.findByUsername("almacenista").isEmpty()) {
-                log.info("👤 Creando usuario ALMACENISTA...");
-                Usuario almacenista = new Usuario();
-                almacenista.setUsername("almacenista");
-                almacenista.setPassword(passwordEncoder.encode("almacen123"));
-                almacenista.setRoles(Set.of(Rol.ALMACENISTA));
+
+            // Actualizar password del ALMACENISTA
+            Optional<Usuario> almacenistaOpt = usuarioRepository.findByCorreo("almacenista@inventario.com");
+            if (almacenistaOpt.isPresent()) {
+                Usuario almacenista = almacenistaOpt.get();
+                String encodedPassword = passwordEncoder.encode("almacen123");
+                almacenista.setContrasena(encodedPassword);
                 usuarioRepository.save(almacenista);
-                log.info("✅ ALMACENISTA creado - usuario: almacenista, password: almacen123");
+                log.info("✅ ALMACENISTA configurado - correo: almacenista@inventario.com, password: almacen123");
+                log.info("🔑 Hash generado: {}", encodedPassword);
             } else {
-                log.info("ℹ️ ALMACENISTA ya existe");
+                log.error("❌ ALMACENISTA no encontrado en la base de datos");
             }
-            
-            // Verificación final
-            long finalCount = usuarioRepository.count();
-            log.info("📈 Resumen - Total de usuarios después: {}", finalCount);
+
             log.info("🎉 ===== DATALOADER COMPLETADO =====");
             
         } catch (Exception e) {
-            log.error("💥 ERROR CRÍTICO en DataLoader: ", e);
-            throw e;
+            log.error("💥 ERROR en DataLoader: ", e);
         }
     }
 }

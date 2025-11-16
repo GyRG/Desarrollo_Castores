@@ -11,8 +11,15 @@ import java.util.Optional;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     
-    @Query("SELECT u FROM Usuario u LEFT JOIN FETCH u.roles WHERE u.username = :username")
-    Optional<Usuario> findByUsername(@Param("username") String username);
+    // Usar consulta nativa para evitar problemas de mapeo
+    @Query(value = "SELECT * FROM usuarios u WHERE u.correo = :correo AND u.estatus = 1", nativeQuery = true)
+    Optional<Usuario> findByCorreo(@Param("correo") String correo);
     
-    boolean existsByUsername(String username);
+    // Verificar si existe un correo
+    @Query(value = "SELECT COUNT(*) > 0 FROM usuarios u WHERE u.correo = :correo", nativeQuery = true)
+    Boolean existsByCorreo(@Param("correo") String correo);
+    
+    // Buscar por nombre
+    @Query(value = "SELECT * FROM usuarios u WHERE u.nombre = :nombre", nativeQuery = true)
+    Optional<Usuario> findByNombre(@Param("nombre") String nombre);
 }

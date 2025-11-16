@@ -3,10 +3,6 @@ package com.inventario.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
 @Table(name = "usuarios")
 @Getter
@@ -18,37 +14,31 @@ public class Usuario {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "idUsuario")
+    private Long idUsuario;
     
-    @Column(unique = true, nullable = false, length = 50)
-    private String username;
+    @Column(name = "nombre", nullable = false, length = 100)
+    private String nombre;
     
-    @Column(nullable = false, length = 255)
-    private String password;
+    @Column(name = "correo", nullable = false, length = 50, unique = true)
+    private String correo;
     
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-        name = "usuario_roles", 
-        joinColumns = @JoinColumn(name = "usuario_id")
-    )
-    @Column(name = "roles")
-    @Enumerated(EnumType.STRING)
-    private Set<Rol> roles = new HashSet<>();
+    @Column(name = "contrasena", nullable = false, length = 255)
+    private String contrasena;
     
-    @Column(name = "fecha_creacion")
-    private LocalDateTime fechaCreacion;
+    @Column(name = "idRol", nullable = false)
+    private Integer idRol;
     
-    @PrePersist
-    protected void onCreate() {
-        if (fechaCreacion == null) {
-            fechaCreacion = LocalDateTime.now();
-        }
+    @Column(name = "estatus", nullable = false)
+    private Integer estatus = 1;
+    
+    // Método para obtener el rol como enum
+    public Rol getRol() {
+        return Rol.fromId(this.idRol);
     }
     
-    // Constructor para facilitar la creación
-    public Usuario(String username, String password, Set<Rol> roles) {
-        this.username = username;
-        this.password = password;
-        this.roles = roles;
+    // Método para verificar si el usuario está activo
+    public boolean isActivo() {
+        return this.estatus == 1;
     }
 }

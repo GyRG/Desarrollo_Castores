@@ -17,7 +17,10 @@
                 <a class="nav-link" href="/salida" sec:authorize="hasRole('ALMACENISTA')">Salida</a>
             </div>
             <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">Usuario: <strong th:text="${username}"></strong></span>
+                <span class="navbar-text me-3">
+    <strong th:text="${nombreUsuario}"></strong>
+    <small class="text-muted" th:text="'(' + ${correoUsuario} + ')'"></small>
+</span>
                 <form th:action="@{/logout}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-light btn-sm">🚪 Cerrar Sesión</button>
                 </form>

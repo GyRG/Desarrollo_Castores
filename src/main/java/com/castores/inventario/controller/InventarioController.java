@@ -1,5 +1,7 @@
 package com.inventario.controller;
 
+import com.inventario.model.Usuario;
+import com.inventario.repository.UsuarioRepository;
 import com.inventario.model.Producto;
 import com.inventario.service.ProductoService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Optional;
+
 @Controller
 @RequestMapping("/inventario")
 @RequiredArgsConstructor
@@ -17,14 +21,25 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class InventarioController {
     
     private final ProductoService productoService;
-    
+    private final UsuarioRepository usuarioRepository;
     // Mostrar inventario con filtro
     @GetMapping
     public String verInventario(@RequestParam(defaultValue = "true") Boolean activos, 
                                Model model, 
                                Authentication authentication) {
+
+        String correo = authentication.getName();
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(correo);
+
         log.info("Cargando inventario para usuario: {}", authentication.getName());
         try {
+
+            if (usuarioOpt.isPresent()) {
+                model.addAttribute("nombreUsuario", usuarioOpt.get().getNombre());
+            } else {
+                model.addAttribute("nombreUsuario", authentication.getName());
+            }
+
             if (activos) {
                 model.addAttribute("productos", productoService.obtenerProductosActivos());
             } else {

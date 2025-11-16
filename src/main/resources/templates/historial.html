@@ -16,7 +16,10 @@
                 <a class="nav-link" href="/salida">Salida</a>
             </div>
             <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">Usuario: <strong th:text="${username}"></strong></span>
+                <span class="navbar-text me-3">
+    <strong th:text="${nombreUsuario}"></strong>
+    <small class="text-muted" th:text="'(' + ${correoUsuario} + ')'"></small>
+</span>
                 <form th:action="@{/logout}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-light btn-sm">🚪 Cerrar Sesión</button>
                 </form>
@@ -27,41 +30,41 @@
     <div class="container mt-4">
         <h2>📋 Historial de Movimientos</h2>
 
-        <!-- Filtros -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form th:action="@{/historial}" method="get" class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label">Filtrar por tipo:</label>
-                <select name="tipo" class="form-select">
-                    <option value="">Todos los movimientos</option>
-                    <option value="ENTRADA" 
-                            th:selected="${tipoFiltro == T(com.inventario.model.TipoMovimiento).ENTRADA}">
-                        Entradas
-                    </option>
-                    <option value="SALIDA" 
-                            th:selected="${tipoFiltro == T(com.inventario.model.TipoMovimiento).SALIDA}">
-                        Salidas
-                    </option>
-                </select>
+        <!-- Filtros CORREGIDOS -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/historial}" method="get" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Filtrar por tipo:</label>
+                        <select name="tipo" class="form-select">
+                            <option value="">Todos los movimientos</option>
+                            <option value="ENTRADA" 
+                                    th:selected="${tipoFiltro == T(com.inventario.model.TipoMovimiento).ENTRADA}">
+                                📥 Entradas
+                            </option>
+                            <option value="SALIDA" 
+                                    th:selected="${tipoFiltro == T(com.inventario.model.TipoMovimiento).SALIDA}">
+                                📤 Salidas
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                        <a th:href="@{/historial}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Limpiar
+                        </a>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-info">
+                            <i class="fas fa-history"></i> 
+                            Total: <span th:text="${#lists.size(movimientos)}"></span> movimientos
+                        </span>
+                    </div>
+                </form>
             </div>
-            <div class="col-md-4">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-filter"></i> Filtrar
-                </button>
-                <a th:href="@{/historial}" class="btn btn-outline-secondary">
-                    <i class="fas fa-times"></i> Limpiar
-                </a>
-            </div>
-            <div class="col-md-4 text-end">
-                <span class="badge bg-info">
-                    <i class="fas fa-history"></i> 
-                    Total: <span th:text="${#lists.size(movimientos)}"></span> movimientos
-                </span>
-            </div>
-        </form>
-    </div>
-</div>
+        </div>
 
         <!-- Tabla de movimientos -->
         <div class="card">
