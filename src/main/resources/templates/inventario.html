@@ -19,7 +19,7 @@
             <div class="navbar-nav ms-auto">
                 <span class="navbar-text me-3">
     <strong th:text="${nombreUsuario}"></strong>
-    <small class="text-muted" th:text="'(' + ${correoUsuario} + ')'"></small>
+    <small class="text-muted" th:text="'(' + ${username} + ')'"></small>
 </span>
                 <form th:action="@{/logout}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-light btn-sm">🚪 Cerrar Sesión</button>
